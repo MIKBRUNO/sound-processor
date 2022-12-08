@@ -2,39 +2,41 @@
 #include <fstream>
 #include <cstring>
 #include <vector>
+#include <cstdint>
+#include "SampleStream.hpp"
 
 using namespace std;
 
 namespace {
 
-    void getOpt(ofstream& out, ifstream& conf, vector<ifstream>& in, int argc, char* argv[]) {
+    void getOpt(string& out, string& conf, vector<string>& in, int argc, char* argv[]) {
         unsigned int argi = 1;
         enum { FIRST, CONF, OUT, IN } state = FIRST;
         while (argi < argc) {
             if (state == FIRST)
                 if (0 == strcmp("-c", argv[argi])) {
-                    conf.open(argv[++argi], ios::in);
+                    conf = argv[++argi];
                     state = OUT;
                 }
                 else {
-                    out.open(argv[argi], ios::out | ios::binary);
+                    out = argv[argi];
                     state = CONF;
                 }
             else if (state == CONF)
                 if (0 == strcmp("-c", argv[argi])) {
-                    conf.open(argv[++argi], ios::in);
+                    conf = argv[++argi];
                     state = IN;
                 }
                 else {
-                    in.push_back(ifstream(argv[argi], ios::binary | ios::in));
+                    in.push_back(argv[argi]);
                     state = CONF;
                 }
             else if (state == OUT) {
-                out.open(argv[argi], ios::out | ios::binary);
+                out = argv[argi];
                 state = IN;
             }
             else if (state == IN) {
-                in.push_back(ifstream(argv[argi], ios::binary | ios::in));
+                in.push_back(argv[argi]);
                 state = IN;
             }
 
@@ -49,25 +51,15 @@ int main(int argc, char* argv[]) {
         cout << "help message" << endl;
         return 0;
     }
-    ofstream out;
-    ifstream conf;
-    vector<ifstream> input;
+    string out = "";
+    string conf = "";
+    vector<string> input;
     getOpt(out, conf, input, argc, argv);
-    try {
-        out.exceptions( ios::failbit | ios::badbit );
-        conf.exceptions( ios::failbit | ios::badbit );
-        for (unsigned int i = 0; i < input.size(); ++i)
-            input[i].exceptions( ios::badbit | ios::failbit );
-    }
-    catch (const ios::failure& e) {
-        cerr << "Failed to open files." << endl;
-        return 1;
-    }
-    if (!out.is_open()) {
+    if (out == "") {
         cerr << "No output file!" << endl;
         return 1;
     }
-    if (!conf.is_open()) {
+    if (conf == "") {
         cerr << "Configuration file is required!" << endl;
         return 1;
     }
@@ -76,7 +68,30 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    
+    int16_t second[44100];
+    try {
+        SoundProcessor::iSampleStream iss { input[0] };
+        SoundProcessor::oSampleStream oss { out };
+        size_t size;
+        while (0 != (size = iss.read(second, 44100)))
+        {
+            oss.write(second, size);
+        }
+        
+    }
+    catch (const SoundProcessor::wav_failure& e) {
+        cerr << e.what() << endl;
+        return 2;
+    }
+    catch (const fstream::failure& e) {
+        cerr << e.what() << endl;
+        return 1;
+    }
+    catch (const exception& e) {
+        cerr << e.what() << endl;
+        return 3;
+    }
+
     
     return 0;
 }
