@@ -1,5 +1,6 @@
 #include <cstring>
 #include "SampleStream.hpp"
+#include "Processor.hpp"
 
 using namespace std;
 
@@ -13,7 +14,6 @@ namespace {
                             "\2\0\x10\0"            // align & bits per sample
                             "data\0\0\0\0";         // data chunk header
 
-    const unsigned int SAMPLE_RATE = 44100;
 
     inline uint32_t le2ui32(const char bytes[4]) {
         return (bytes[0]&0xff) | ((bytes[1]&0xff) << 8) | ((bytes[2]&0xff) << 16) | ((bytes[3]&0xff) << 24);

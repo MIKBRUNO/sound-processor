@@ -1,3 +1,4 @@
-add_library(${LIB_NAME} "SampleStream.cpp")
+add_library(${LIB_NAME} "SampleStream.cpp" "Processor.cpp")
+add_library(mute_converter SHARED "MuteConverter.cpp")
 add_executable(${EXEC_NAME} main.cpp)
-target_link_libraries(${EXEC_NAME} ${LIB_NAME})
+target_link_libraries(${EXEC_NAME} ${LIB_NAME} mute_converter)

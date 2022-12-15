@@ -1,3 +1,4 @@
+#pragma once
 #include <fstream>
 #include <cstdint>
 #include <string>
@@ -8,7 +9,7 @@ namespace SoundProcessor {
     public:
         inline wav_failure(const char* msg) : m(msg) {}
         inline wav_failure() : m(nullptr) {}
-        inline virtual const char* what() const noexcept {
+        virtual const char* what() const noexcept {
             return m == nullptr ? "Bad WAV format" : m;
         }
     private:
@@ -19,9 +20,9 @@ namespace SoundProcessor {
     public:
         explicit iSampleStream(const std::string&);
         iSampleStream(const iSampleStream&) = delete;
-        iSampleStream(iSampleStream&&) = delete;
+        inline iSampleStream(iSampleStream&& o) = delete;
         iSampleStream& operator= (const iSampleStream&) = delete;
-        iSampleStream& operator= (iSampleStream&&) = delete;
+        inline iSampleStream& operator= (iSampleStream&& o) = delete;
         inline ~iSampleStream() {
             file.close();
         }
@@ -37,9 +38,9 @@ namespace SoundProcessor {
     public:
         explicit oSampleStream(const std::string&);
         oSampleStream(const oSampleStream&) = delete;
-        oSampleStream(oSampleStream&&) = delete;
+        inline oSampleStream(oSampleStream&& o) = delete;
         oSampleStream& operator= (const oSampleStream&) = delete;
-        oSampleStream& operator= (oSampleStream&&) = delete;
+        inline oSampleStream& operator= (oSampleStream&& o) = delete;
         inline ~oSampleStream() {
             file.close();
         }
