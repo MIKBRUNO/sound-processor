@@ -19,18 +19,22 @@ namespace SoundProcessor {
     class iSampleStream {
     public:
         explicit iSampleStream(const std::string&);
-        iSampleStream(const iSampleStream&) = delete;
-        inline iSampleStream(iSampleStream&& o) = delete;
-        iSampleStream& operator= (const iSampleStream&) = delete;
-        inline iSampleStream& operator= (iSampleStream&& o) = delete;
+        inline iSampleStream(const iSampleStream& o) : iSampleStream(*o.name) {}
+        inline iSampleStream(iSampleStream&& o) : iSampleStream(*o.name) {}
+        iSampleStream& operator= (const iSampleStream& o) = delete;
+        iSampleStream& operator= (iSampleStream&& o) = delete;
         inline ~iSampleStream() {
             file.close();
+            delete name;
         }
+
         size_t read(int16_t* buffer, size_t size);
+        inline const std::string& getName() const { return *name; }
     private:
         std::ifstream file;
         std::streampos dataBeg;
         std::size_t dataBytes;
+        const std::string* name;
         void initWAVfile();
     };
 
@@ -43,11 +47,15 @@ namespace SoundProcessor {
         inline oSampleStream& operator= (oSampleStream&& o) = delete;
         inline ~oSampleStream() {
             file.close();
+            delete name;
         }
         void write(const int16_t* buffer, size_t size);
+
+        inline const std::string& getName() const { return *name; }
     private:
         std::ofstream file;
         std::size_t dataSize;
+        const std::string* name;
         void commitWAVfile();
     };
 

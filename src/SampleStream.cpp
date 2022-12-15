@@ -39,7 +39,7 @@ namespace {
 
 namespace SoundProcessor {
 
-    iSampleStream::iSampleStream(const string& filename) {
+    iSampleStream::iSampleStream(const string& filename) : name(new string(filename)) {
         file.exceptions( ios::badbit | ios::failbit | ios::eofbit );
         try {
             file.open(filename, ios::in | ios::binary);
@@ -135,7 +135,8 @@ namespace SoundProcessor {
         }
     }
 
-    oSampleStream::oSampleStream(const std::string& filename) {
+    oSampleStream::oSampleStream(const std::string& filename)
+    : name(new string(filename)), dataSize(0) {
         file.exceptions( ios::badbit | ios::failbit | ios::eofbit );
         try {
             file.open(filename, ios::out | ios::binary);

@@ -2,6 +2,7 @@
 #include <sstream>
 #include "Processor.hpp"
 #include "MuteConverter.hpp"
+#include "MixConverter.hpp"
 
 using namespace std;
 
@@ -16,7 +17,9 @@ namespace {
         if (0 == name.compare("mute")) {
             return SoundProcessor::muteConverterParser(iargs, streams, streamIdxs);
         }
-        // else if
+        else if (0 == name.compare("mix")) {
+            return SoundProcessor::mixConverterParser(iargs, streams, streamIdxs);
+        }
         else {
             throw SoundProcessor::config_failure("Bad converter name");
         }
@@ -61,16 +64,16 @@ namespace SoundProcessor {
                     buf.erase(0, 1);
                     size_t id = 0;
                     try {
-                        size_t id = stoul(buf);
+                        id = stoul(buf);
                     }
                     catch (const exception&) {
                         throw config_failure("Bad stream number after $");
                     }
-                    if (id >= streams.size() || 0 == id)
+                    if (id >= streams.size() + 1 || 0 == id)
                         throw config_failure("Bad stream number after $");
-                    inIdxs.push_back(id);
+                    inIdxs.push_back(id - 1);
                 }
-                else {
+                else if (!buf.empty()) {
                     try {
                         iargs.push_back(stoi(buf));
                     }

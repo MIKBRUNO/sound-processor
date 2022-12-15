@@ -5,7 +5,7 @@ namespace SoundProcessor {
 
     class MuteConverter : public Converter {
     public:
-        inline MuteConverter(size_t b, size_t e) : muteBeg(b*SAMPLE_RATE), muteEnd(e*SAMPLE_RATE) {  }
+        inline MuteConverter(size_t b = 0, size_t e = 0) : muteBeg(b), muteEnd(e) {  }
         virtual void convert(int16_t*, size_t, size_t);
         virtual ~MuteConverter() noexcept {}
     private:

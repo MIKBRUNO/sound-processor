@@ -2,6 +2,7 @@
 #include <cstdint>
 #include <cstddef>
 #include <memory>
+#include "SampleStream.hpp"
 
 namespace SoundProcessor {
 

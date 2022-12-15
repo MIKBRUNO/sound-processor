@@ -6,10 +6,10 @@ using namespace std;
 namespace SoundProcessor {
 
     void MuteConverter::convert(int16_t* block, size_t blockSize, size_t blockBeg) {
-        if (blockBeg >= muteEnd || blockBeg + blockSize < muteBeg)
+        if ((blockBeg >= muteEnd && 0 != muteEnd) || blockBeg + blockSize < muteBeg)
             return;
         size_t i = muteBeg < blockBeg ? 0 : muteBeg - blockBeg;
-        for (;i < blockSize && i < muteEnd - blockBeg; ++i)
+        for (;i < blockSize && (i < muteEnd - blockBeg || 0 == muteEnd); ++i)
             block[i] = 0;
     }
 
@@ -18,11 +18,15 @@ namespace SoundProcessor {
         const std::vector<std::string>& files,
         const std::vector<size_t>& fileidxs
     ) {
-        if (iargs.size() != 2 || fileidxs.size() != 0)
+        if (iargs.size() > 2 || fileidxs.size() != 0)
             throw config_failure("Bad number of arguments for mute converter");
-        if (iargs[0] < 0 || iargs[1] < 0)
-            throw config_failure("Bad arguments for mute converter");
-        MuteConverterCreator mcc(iargs[0], iargs[1]);
+        int beg = iargs.size() >= 1 ? iargs[0] : 0;
+        int end = iargs.size() == 2 ? iargs[1] : 0;
+        if (beg < 0 || end < 0)
+            throw config_failure("Bad arguments for mix converter");
+        MuteConverterCreator mcc(
+            static_cast<size_t>(beg)*SAMPLE_RATE,
+            static_cast<size_t>(end)*SAMPLE_RATE);
         return mcc.create();
     }
 
