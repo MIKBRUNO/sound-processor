@@ -3,7 +3,7 @@
 #include <cstring>
 #include <vector>
 #include <cstdint>
-#include "SampleStream.hpp"
+#include "Processor.hpp"
 
 using namespace std;
 
@@ -48,18 +48,26 @@ namespace {
 
 int main(int argc, char* argv[]) {
     if (argc > 1 && 0 == strcmp(argv[1], "-h")) {
-        cout << "help message" << endl;
+        cout << "sound_processor [-h] "
+        "[-c <config file>] "
+        "<output> <input1> [<input2> …]\n" << endl;
+        cout << "Valid input files are WAV files; mono PCM s16le 44100Hz format." << endl;
+        cout << "Configuration file includes comment-lines after #,"
+            " and converters with arguments." << endl;
+        cout << "Valid Converters:\n" << endl;
+        for (auto creator : SoundProcessor::Configuration::creators)
+            cout << creator->getHelp() << endl;
         return 0;
     }
-    string out = "";
-    string conf = "";
+    string out;
+    string conf;
     vector<string> input;
     getOpt(out, conf, input, argc, argv);
-    if (out == "") {
+    if (out.compare("") == 0) {
         cerr << "No output file!" << endl;
         return 1;
     }
-    if (conf == "") {
+    if (conf.compare("") == 0) {
         cerr << "Configuration file is required!" << endl;
         return 1;
     }
@@ -68,30 +76,23 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    int16_t second[44100];
     try {
-        SoundProcessor::iSampleStream iss { input[0] };
-        SoundProcessor::oSampleStream oss { out };
-        size_t size;
-        while (0 != (size = iss.read(second, 44100)))
-        {
-            oss.write(second, size);
-        }
-        
+        SoundProcessor::Configuration configuration { conf, input };
+        SoundProcessor::Processor proc { configuration, out, input[0] };
+        proc.run();
     }
     catch (const SoundProcessor::wav_failure& e) {
         cerr << e.what() << endl;
-        return 2;
+        return 3;
     }
     catch (const fstream::failure& e) {
         cerr << e.what() << endl;
-        return 1;
+        return 2;
     }
     catch (const exception& e) {
         cerr << e.what() << endl;
-        return 3;
+        return 1;
     }
-
     
     return 0;
 }

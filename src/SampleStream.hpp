@@ -1,3 +1,4 @@
+#pragma once
 #include <fstream>
 #include <cstdint>
 #include <string>
@@ -8,7 +9,7 @@ namespace SoundProcessor {
     public:
         inline wav_failure(const char* msg) : m(msg) {}
         inline wav_failure() : m(nullptr) {}
-        inline virtual const char* what() const noexcept {
+        virtual const char* what() const noexcept {
             return m == nullptr ? "Bad WAV format" : m;
         }
     private:
@@ -18,18 +19,22 @@ namespace SoundProcessor {
     class iSampleStream {
     public:
         explicit iSampleStream(const std::string&);
-        iSampleStream(const iSampleStream&) = delete;
-        iSampleStream(iSampleStream&&) = delete;
-        iSampleStream& operator= (const iSampleStream&) = delete;
-        iSampleStream& operator= (iSampleStream&&) = delete;
+        inline iSampleStream(const iSampleStream& o) : iSampleStream(*o.name) {}
+        inline iSampleStream(iSampleStream&& o) : iSampleStream(*o.name) {}
+        iSampleStream& operator= (const iSampleStream& o) = delete;
+        iSampleStream& operator= (iSampleStream&& o) = delete;
         inline ~iSampleStream() {
             file.close();
+            delete name;
         }
+
         size_t read(int16_t* buffer, size_t size);
+        inline const std::string& getName() const { return *name; }
     private:
         std::ifstream file;
         std::streampos dataBeg;
         std::size_t dataBytes;
+        const std::string* name;
         void initWAVfile();
     };
 
@@ -37,16 +42,20 @@ namespace SoundProcessor {
     public:
         explicit oSampleStream(const std::string&);
         oSampleStream(const oSampleStream&) = delete;
-        oSampleStream(oSampleStream&&) = delete;
+        inline oSampleStream(oSampleStream&& o) = delete;
         oSampleStream& operator= (const oSampleStream&) = delete;
-        oSampleStream& operator= (oSampleStream&&) = delete;
+        inline oSampleStream& operator= (oSampleStream&& o) = delete;
         inline ~oSampleStream() {
             file.close();
+            delete name;
         }
         void write(const int16_t* buffer, size_t size);
+
+        inline const std::string& getName() const { return *name; }
     private:
         std::ofstream file;
         std::size_t dataSize;
+        const std::string* name;
         void commitWAVfile();
     };
 
