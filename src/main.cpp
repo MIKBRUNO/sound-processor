@@ -48,7 +48,15 @@ namespace {
 
 int main(int argc, char* argv[]) {
     if (argc > 1 && 0 == strcmp(argv[1], "-h")) {
-        cout << "help message" << endl;
+        cout << "sound_processor [-h] "
+        "[-c <config file>] "
+        "<output> <input1> [<input2> …]\n" << endl;
+        cout << "Valid input files are WAV files; mono PCM s16le 44100Hz format." << endl;
+        cout << "Configuration file includes comment-lines after #,"
+            " and converters with arguments." << endl;
+        cout << "Valid Converters:\n" << endl;
+        for (auto creator : SoundProcessor::Configuration::creators)
+            cout << creator->getHelp() << endl;
         return 0;
     }
     string out;
@@ -85,7 +93,6 @@ int main(int argc, char* argv[]) {
         cerr << e.what() << endl;
         return 1;
     }
-
     
     return 0;
 }

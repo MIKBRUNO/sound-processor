@@ -17,23 +17,13 @@ namespace SoundProcessor {
     };
 
     class MixConverterCreator : public ConverterCreator {
-    public:
-        inline MixConverterCreator(
-            const iSampleStream& mixing, 
-            size_t begin, size_t end)
-            : b(begin), e(end), mixingStream(mixing) {}
-        virtual std::shared_ptr<Converter> create() {
-            return std::make_shared<MixConverter>(mixingStream, b, e);
-        }
-    private:
-        size_t b, e;
-        const iSampleStream& mixingStream;
+        virtual std::shared_ptr<Converter> parse(
+            const std::vector<int>& iargs,
+            const std::vector<std::string>& streams,
+            const std::vector<size_t>& streamIdxs
+        ) const;
+        virtual const char* getName() const;
+        virtual const char* getHelp() const;
     };
-    
-    std::shared_ptr<Converter> mixConverterParser (
-        const std::vector<int>&,
-        const std::vector<std::string>&,
-        const std::vector<size_t>&
-    );
     
 }

@@ -21,12 +21,20 @@ namespace SoundProcessor {
     
     class Configuration {
     public:
-        Configuration(const std::string&, const std::vector<std::string>&);
         using converterVector = std::vector<std::shared_ptr<Converter>>;
+        
+        Configuration(const std::string&, const std::vector<std::string>&);
         inline const converterVector& getConverters() const { return converters; }
+        const static std::vector<ConverterCreator*>& creators;
     private:
         converterVector converters;
         void readConfig(std::ifstream&, const std::vector<std::string>&);
+        std::shared_ptr<Converter> converterParser(
+            const std::string& name,
+            const std::vector<int>& iargs,
+            const std::vector<std::string>& streams,
+            const std::vector<size_t>& streamIdxs
+        );
     };
 
     class Processor {

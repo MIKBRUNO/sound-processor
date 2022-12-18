@@ -23,11 +23,11 @@ namespace SoundProcessor {
         delete[] mixBlock;
     }
 
-    shared_ptr<Converter> mixConverterParser (
+    shared_ptr<Converter> MixConverterCreator::parse (
         const std::vector<int>& iargs,
         const std::vector<std::string>& files,
         const std::vector<size_t>& fileidxs
-    ) {
+    ) const {
         if (iargs.size() > 2 || fileidxs.size() != 1)
             throw config_failure("Bad arguments for mix converter");
         int beg = iargs.size() >= 1 ? iargs[0] : 0;
@@ -35,11 +35,18 @@ namespace SoundProcessor {
         if (beg < 0 || end < 0)
             throw config_failure("Bad arguments for mix converter");
         iSampleStream iss { files[fileidxs[0]] };
-        MixConverterCreator mcc(
+        return make_shared<MixConverter>(
             iss,
             static_cast<size_t>(beg)*SAMPLE_RATE,
-            static_cast<size_t>(end)*SAMPLE_RATE);
-        return mcc.create();
+            static_cast<size_t>(end)*SAMPLE_RATE
+        );
+    }
+
+    const char* MixConverterCreator::getName() const { return "mix"; }
+    const char* MixConverterCreator::getHelp() const {
+        return "mix converter: "
+            "Mixes stream from previous converter and mixes with input stream\n"
+            "configuration: mix $<stream number> <begin>[=0] <end>[=0]\n";
     }
 
 }

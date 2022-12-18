@@ -3,17 +3,19 @@
 
 namespace SoundProcessor {
 
-    class MuteConverter : public Converter {
+    class VolumeConverter : public Converter {
     public:
-        inline MuteConverter(size_t b = 0, size_t e = 0) : muteBeg(b), muteEnd(e) {  }
+        inline VolumeConverter(unsigned int vol, size_t b = 0, size_t e = 0)
+        : beg(b), end(e), volume(vol) {  }
         virtual void convert(int16_t*, size_t, size_t);
-        virtual ~MuteConverter() noexcept {}
+        virtual ~VolumeConverter() noexcept {}
     private:
-        size_t muteBeg;
-        size_t muteEnd;
+        unsigned int volume;
+        size_t beg;
+        size_t end;
     };
 
-    class MuteConverterCreator : public ConverterCreator {
+    class VolumeConverterCreator : public ConverterCreator {
     public:
         virtual std::shared_ptr<Converter> parse(
             const std::vector<int>& iargs,

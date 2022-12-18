@@ -14,7 +14,13 @@ namespace SoundProcessor {
 
     class ConverterCreator {
     public:
-        virtual std::shared_ptr<Converter> create() = 0;
+        virtual std::shared_ptr<Converter> parse(
+            const std::vector<int>& iargs,
+            const std::vector<std::string>& streams,
+            const std::vector<size_t>& streamIdxs
+        ) const = 0;
+        virtual const char* getName() const = 0;
+        virtual const char* getHelp() const = 0;
     };
 
 }

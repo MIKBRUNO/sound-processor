@@ -3,32 +3,41 @@
 #include "Processor.hpp"
 #include "MuteConverter.hpp"
 #include "MixConverter.hpp"
+#include "VolumeConverter.hpp"
 
 using namespace std;
 
 namespace {
 
-    inline shared_ptr<SoundProcessor::Converter> ConverterFactory(
-        const string& name,
-        const vector<int>& iargs,
-        const vector<string>& streams,
-        const vector<size_t>& streamIdxs
-    ) {
-        if (0 == name.compare("mute")) {
-            return SoundProcessor::muteConverterParser(iargs, streams, streamIdxs);
-        }
-        else if (0 == name.compare("mix")) {
-            return SoundProcessor::mixConverterParser(iargs, streams, streamIdxs);
-        }
-        else {
-            throw SoundProcessor::config_failure("Bad converter name");
-        }
-    }
+    SoundProcessor::MuteConverterCreator mucc;
+    SoundProcessor::MixConverterCreator micc;
+    SoundProcessor::VolumeConverterCreator vcc;
+
+    const vector<SoundProcessor::ConverterCreator*> USABLE_CONVERTERS = {
+        &mucc,
+        &micc,
+        &vcc
+    };
 
 }
 
 namespace SoundProcessor {
     
+    inline shared_ptr<Converter> Configuration::converterParser(
+        const string& name,
+        const vector<int>& iargs,
+        const vector<string>& streams,
+        const vector<size_t>& streamIdxs
+    ) {
+        for (auto creator : creators) {
+            if (0 == name.compare(creator->getName()))
+                return creator->parse(iargs, streams, streamIdxs);
+        }
+        throw SoundProcessor::config_failure("Bad converter name");
+    }
+
+    const vector<ConverterCreator*>& Configuration::creators = USABLE_CONVERTERS;
+
     Configuration::Configuration(const string& filename, const vector<string>& streams) {
         ifstream f;
         f.exceptions( fstream::badbit | fstream::failbit );
@@ -83,7 +92,7 @@ namespace SoundProcessor {
                 }
             }
             if (!isspace(name[0]))
-                converters.push_back(ConverterFactory(name, iargs, streams, inIdxs));
+                converters.push_back(converterParser(name, iargs, streams, inIdxs));
         }
     }
 
